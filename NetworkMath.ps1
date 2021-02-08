@@ -146,7 +146,10 @@ function getNumOfHosts{
     [Int] $subnetMask = [Convert]::ToInt32($IPv4.Split("/")[1])
 
     # Calculate the Number of Usable Hosts and Return
-    # Number of Hosts = (2 ^ n) - 2
+    # Number of Hosts = (2 ^ (32 - n)) - 2
+    If($subnetMask -eq 31){
+        return "1"
+    }
     [Int] $hosts = ([Math]::Pow(2, (32 - $subnetMask)) - 2)
     return $hosts.ToString()
 }
