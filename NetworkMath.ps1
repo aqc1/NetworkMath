@@ -17,23 +17,23 @@ Function findNetworkID{
         $subnetString = $subnetString + '0'
     }
 
-    #Split IP Address Into Binary Octets
+    # Split IP Address Into Binary Octets
     [String[]] $octets = $octetStrings | ForEach-Object {[Convert]::ToString($_, 2).PadLeft(8, '0')}
     
-    #Split Subnet String into Octet Sized Substrings                            
+    # Split Subnet String into Octet Sized Substrings                            
     [String[]] $subnet = @($subnetString.Substring(0,8).PadLeft(8,'0'),
                            $subnetString.Substring(8,8).PadLeft(8,'0'),
                            $subnetString.Substring(16,8).PadLeft(8,'0'),
                            $subnetString.Substring(24).PadLeft(8,'0')) 
                                  
-    #Create the NetworkID One Octet at a Time
-    #NetworkID = IP -and Subnet Mask
+    # Create the NetworkID One Octet at a Time
+    # NetworkID = IP -and Subnet Mask
     [String[]] $networkIdOctets = @()
     For([Int]$i = 0; $i -lt 4; $i++){
         $networkIdOctets += [Convert]::ToInt32([Convert]::ToString([Convert]::ToInt32($octets[$i],2) -bAnd [Convert]::ToInt32($subnet[$i],2),2), 2).ToString()
     }
     
-    #Join the NetworkID Octets and Return
+    # Join the NetworkID Octets and Return
     [String] $networkID = $networkIdOctets -join "`."
     return $networkID
 }
@@ -142,26 +142,29 @@ function getNumOfHosts{
         [String] $IPv4
     )
 
-    #Split Subnet Mask from IPv4 Subnet
+    # Split Subnet Mask from IPv4 Subnet
     [Int] $subnetMask = [Convert]::ToInt32($IPv4.Split("/")[1])
 
     # Calculate the Number of Usable Hosts and Return
     # Number of Hosts = (2 ^ (32 - n)) - 2
-    If($subnetMask -ge 31){
-        return "0"
+    If($subnetMask -eq 31){
+        return "0 [For Point-to-Point USe Only]"
+    }
+    If($subnetMask -eq 32){
+        return "0 [Isolated]"
     }
     [Int] $hosts = ([Math]::Pow(2, (32 - $subnetMask)) - 2)
     return $hosts.ToString()
 }
 
 
-#Valid IPv4 Regex
+# Valid IPv4 Regex
 [Regex] $IPRegex = "^\d{1,3}(\.\d{1,3}){3}(/\d{1,2})?$"
 
-#Take User Input
+# Take User Input
 [String] $IPv4 = Read-Host("Enter IPv4 Address in CIDR Notation (/24 by Default)")
 
-#Sanitize Input via Regex and Iteration
+# Sanitize Input via Regex and Iteration
 If($IPv4 -NotMatch $IPRegex){
     # Not an IPv4 Address
     Write-Host("Entered IP Address Not Valid.") 
