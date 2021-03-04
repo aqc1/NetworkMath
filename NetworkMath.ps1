@@ -148,7 +148,7 @@ function getNumOfHosts{
     # Calculate the Number of Usable Hosts and Return
     # Number of Hosts = (2 ^ (32 - n)) - 2
     If($subnetMask -eq 31){
-        return "0 [For Point-to-Point USe Only]"
+        return "0 [For Point-to-Point Use Only]"
     }
     If($subnetMask -eq 32){
         return "0 [Isolated]"
